@@ -1,6 +1,13 @@
 # ✦ LinkAura
 
 > **Your Links, Elevated** — The most elegant and intelligent link-in-bio page builder.
+## ✨ Preview
+
+![LinkAura Landing Page](./assets/preview1.png)
+
+![LinkAura Builder Interface](./assets/preview2.png)
+
+*Elegant link-in-bio pages with real-time preview and luxurious editor*
 
 ![LinkAura Preview](https://img.shields.io/badge/LinkAura-v1.0.0-gold?style=flat-square)
 ![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen?style=flat-square)
