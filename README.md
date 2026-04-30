@@ -183,6 +183,7 @@ Designed and built with love for creators everywhere.
 - Icons: Custom SVGs
 
 ---
+**Made with love ❤️ by [BlackBirdo](https://blackbirdo.com)**
 
 <p align="center">
   <strong>LinkAura</strong> — Your Links, Elevated ✦
