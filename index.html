@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LinkAura — The most elegant and intelligent link-in-bio page builder. Create luxurious, beautiful link pages in seconds." />
+  <title>LinkAura — Your Links, Elevated</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Cormorant Garamond (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: ['attribute', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Cormorant Garamond', 'serif'],
+            body: ['DM Sans', 'sans-serif'],
+            mono: ['DM Mono', 'monospace'],
+          },
+          colors: {
+            aura: {
+              50:  '#fdf8f0',
+              100: '#f8edda',
+              200: '#f0d9b0',
+              300: '#e4be7a',
+              400: '#d49d45',
+              500: '#c4842a',
+              600: '#a86b20',
+              700: '#8a531d',
+              800: '#72431e',
+              900: '#5e381c',
+            }
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'fadeInUp': 'fadeInUp 0.6s ease forwards',
+            'shimmer': 'shimmer 2s linear infinite',
+            'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="font-body antialiased overflow-x-hidden">
+
+  <!-- ═══════════════════════════════════════════════════
+       CANVAS: Ambient background particles
+  ═══════════════════════════════════════════════════ -->
+  <canvas id="particles-canvas" aria-hidden="true"></canvas>
+
+  <!-- ═══════════════════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════════════════ -->
+  <header class="la-header" role="banner">
+    <div class="la-header__inner">
+      <!-- Logo -->
+      <a href="/" class="la-logo" aria-label="LinkAura home">
+        <span class="la-logo__mark" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="14" cy="14" r="7" fill="currentColor" opacity="0.15"/>
+            <circle cx="14" cy="14" r="3.5" fill="currentColor"/>
+            <path d="M14 1 L14 4M14 24 L14 27M1 14 L4 14M24 14 L27 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="la-logo__text">
+          Link<em>Aura</em>
+        </span>
+      </a>
+
+      <!-- Tagline (desktop) -->
+      <p class="la-header__tagline hidden md:block">Your Links, Elevated</p>
+
+      <!-- Nav Actions -->
+      <nav class="la-header__actions" aria-label="Header actions">
+        <!-- Page Switcher -->
+        <div class="la-pill-switcher" role="tablist" aria-label="View mode">
+          <button class="la-pill-btn active" id="tab-builder" aria-label="Open builder">
+            Builder
+          </button>
+          <button class="la-pill-btn" id="tab-preview" aria-label="Full screen preview" title="Open full preview in new tab">
+            Preview
+          </button>
+          <button class="la-pill-btn" id="tab-pages" aria-label="Manage your pages">
+            Pages
+          </button>
+        </div>
+
+        <!-- GitHub -->
+        <a href="https://github.com/linkaura" target="_blank" rel="noopener noreferrer" class="la-icon-btn" aria-label="View on GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+        </a>
+
+        <!-- Theme Toggle -->
+        <button class="la-icon-btn la-theme-toggle" id="theme-toggle" aria-label="Toggle theme" aria-pressed="false">
+          <!-- Sun icon (shown in dark mode) -->
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+          <!-- Moon icon (shown in light mode) -->
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════════════ -->
+  <main id="app-root">
+
+    <!-- ─────────────────────────────────────────
+         VIEW: LANDING (shown before creating)
+    ───────────────────────────────────────── -->
+    <section id="view-landing" class="la-view active la-landing" aria-labelledby="landing-heading">
+      <div class="la-landing__inner">
+        <!-- Hero Text -->
+        <div class="la-landing__hero">
+          <div class="la-landing__badge">
+            <span class="la-badge-dot" aria-hidden="true"></span>
+            Trusted by 12,000+ creators
+          </div>
+          <h1 id="landing-heading" class="la-landing__title">
+            One link.<br/>
+            <em>Infinite impression.</em>
+          </h1>
+          <p class="la-landing__subtitle">
+            Build a breathtaking link-in-bio page that feels like a personal brand website — complete with AI-powered suggestions, niche templates, and a live preview editor.
+          </p>
+
+          <!-- CTA Buttons -->
+          <div class="la-landing__cta">
+            <button class="la-btn la-btn--primary" id="cta-builder" aria-label="Open the smart builder">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              Create Your LinkAura
+            </button>
+            <button class="la-btn la-btn--ghost" id="cta-ai" aria-label="Try AI smart suggestions">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              Try AI Smart Builder
+            </button>
+          </div>
+        </div>
+
+        <!-- Feature Pills -->
+        <div class="la-landing__features" aria-label="Key features">
+          <div class="la-feature-pill">
+            <span aria-hidden="true">✦</span> Drag &amp; Drop Editor
+          </div>
+          <div class="la-feature-pill">
+            <span aria-hidden="true">✦</span> AI Suggestions
+          </div>
+          <div class="la-feature-pill">
+            <span aria-hidden="true">✦</span> Niche Templates
+          </div>
+          <div class="la-feature-pill">
+            <span aria-hidden="true">✦</span> Mini Website Mode
+          </div>
+          <div class="la-feature-pill">
+            <span aria-hidden="true">✦</span> No Account Needed
+          </div>
+        </div>
+
+        <!-- Template Cards Preview -->
+        <div class="la-landing__templates" aria-label="Template previews">
+          <h2 class="la-section-label">Templates for every creator</h2>
+          <div class="la-template-grid" id="template-grid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────
+         VIEW: AI ONBOARDING
+    ───────────────────────────────────────── -->
+    <section id="view-ai-onboard" class="la-view" aria-labelledby="ai-onboard-heading">
+      <div class="la-ai-onboard">
+        <div class="la-ai-onboard__card">
+          <div class="la-ai-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          <h2 id="ai-onboard-heading" class="la-ai-onboard__title">AI Smart Builder</h2>
+          <p class="la-ai-onboard__subtitle">Tell us a little about yourself and we'll craft the perfect LinkAura page for you.</p>
+
+          <div class="la-form-group">
+            <label for="ai-name" class="la-label">Your Name</label>
+            <input type="text" id="ai-name" class="la-input" placeholder="e.g. Zara Noelle" autocomplete="given-name" />
+          </div>
+
+          <div class="la-form-group">
+            <label for="ai-niche" class="la-label">Your Niche / Profession</label>
+            <input type="text" id="ai-niche" class="la-input" placeholder="e.g. Fashion photographer, indie musician, life coach…" />
+          </div>
+
+          <div class="la-form-group">
+            <label for="ai-vibe" class="la-label">Your Vibe (optional)</label>
+            <input type="text" id="ai-vibe" class="la-input" placeholder="e.g. Minimalist, warm, bold, playful…" />
+          </div>
+
+          <button class="la-btn la-btn--primary la-btn--full" id="ai-generate-btn" aria-label="Generate my LinkAura page">
+            <span class="btn-label">Generate My LinkAura</span>
+            <span class="btn-loader" aria-hidden="true" hidden>
+              <span class="la-spinner"></span> Crafting your page…
+            </span>
+          </button>
+
+          <button class="la-btn la-btn--ghost la-btn--full mt-3" id="ai-skip-btn">
+            Skip — Start from scratch
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────
+         VIEW: BUILDER (main editor + preview)
+    ───────────────────────────────────────── -->
+    <section id="view-builder" class="la-view" aria-labelledby="builder-heading">
+      <div class="la-builder">
+
+        <!-- ── LEFT: Editor Panel ── -->
+        <aside class="la-editor" aria-label="Page editor">
+          <!-- Tabs -->
+          <div class="la-editor__tabs" role="tablist" aria-label="Editor sections">
+            <button class="la-tab active" role="tab" aria-selected="true" data-tab="profile" aria-controls="tab-panel-profile">Profile</button>
+            <button class="la-tab" role="tab" aria-selected="false" data-tab="links" aria-controls="tab-panel-links">Links</button>
+            <button class="la-tab" role="tab" aria-selected="false" data-tab="design" aria-controls="tab-panel-design">Design</button>
+            <button class="la-tab" role="tab" aria-selected="false" data-tab="website" aria-controls="tab-panel-website">Website+</button>
+          </div>
+
+          <!-- Tab Panel: Profile -->
+          <div class="la-tab-panel active" id="tab-panel-profile" role="tabpanel" aria-labelledby="tab-profile">
+            <div class="la-editor__section">
+              <!-- Avatar Upload -->
+              <div class="la-avatar-upload" id="avatar-upload-zone" role="button" tabindex="0" aria-label="Upload profile photo">
+                <div class="la-avatar-preview" id="avatar-preview">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+                <p class="la-avatar-hint">Click or drag to upload photo</p>
+                <input type="file" id="avatar-file" accept="image/*" class="sr-only" aria-label="Upload profile photo file" />
+              </div>
+
+              <!-- Name + Username -->
+              <div class="la-form-group">
+                <label for="profile-name" class="la-label">Display Name</label>
+                <input type="text" id="profile-name" class="la-input" placeholder="Your full name" />
+              </div>
+              <div class="la-form-group">
+                <label for="profile-username" class="la-label">
+                  Username
+                  <span class="la-label-hint">linkaura.io/<span id="username-preview">you</span></span>
+                </label>
+                <input type="text" id="profile-username" class="la-input la-input--mono" placeholder="your-username" />
+              </div>
+              <div class="la-form-group">
+                <label for="profile-bio" class="la-label">Bio</label>
+                <textarea id="profile-bio" class="la-input la-textarea" placeholder="A short, compelling bio about you…" rows="3" maxlength="200"></textarea>
+                <span class="la-char-count"><span id="bio-count">0</span>/200</span>
+              </div>
+
+              <!-- AI Suggest Bio button -->
+              <button class="la-btn la-btn--ai" id="suggest-bio-btn" aria-label="AI suggest bio text">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                Suggest Bio with AI
+              </button>
+
+              <!-- Social Icons -->
+              <div class="la-form-group">
+                <label class="la-label">Social Profiles</label>
+                <div id="social-links-container" class="la-social-grid">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Panel: Links -->
+          <div class="la-tab-panel" id="tab-panel-links" role="tabpanel" aria-labelledby="tab-links">
+            <div class="la-editor__section">
+              <!-- AI Suggest Links -->
+              <button class="la-btn la-btn--ai la-btn--full" id="suggest-links-btn" aria-label="AI suggest links">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                AI Smart Link Suggestions
+              </button>
+
+              <!-- Links List (drag & drop) -->
+              <div id="links-list" class="la-links-list" role="list" aria-label="Your links (drag to reorder)">
+                <!-- Link cards injected by JS -->
+              </div>
+
+              <!-- Add Link -->
+              <button class="la-btn la-btn--dashed la-btn--full" id="add-link-btn" aria-label="Add a new link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Add Link
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab Panel: Design -->
+          <div class="la-tab-panel" id="tab-panel-design" role="tabpanel" aria-labelledby="tab-design">
+            <div class="la-editor__section">
+
+              <!-- Niche Templates -->
+              <div class="la-form-group">
+                <label class="la-label">Niche Templates</label>
+                <div class="la-template-chips" id="template-chips" role="group" aria-label="Choose a niche template">
+                  <!-- Chips injected by JS -->
+                </div>
+              </div>
+
+              <!-- Accent Color -->
+              <div class="la-form-group">
+                <label class="la-label">Accent Color</label>
+                <div class="la-color-palette" id="color-palette" role="group" aria-label="Color palette">
+                  <!-- Colors injected by JS -->
+                </div>
+                <div class="la-custom-color">
+                  <label for="custom-color" class="la-label-sm">Custom</label>
+                  <input type="color" id="custom-color" class="la-color-input" value="#c4842a" aria-label="Pick a custom color" />
+                </div>
+              </div>
+
+              <!-- Background Style -->
+              <div class="la-form-group">
+                <label class="la-label">Background</label>
+                <div class="la-bg-options" role="group" aria-label="Background style">
+                  <button class="la-bg-btn active" data-bg="particles" aria-pressed="true">
+                    <span class="la-bg-icon">✦</span>
+                    <span>Particles</span>
+                  </button>
+                  <button class="la-bg-btn" data-bg="gradient" aria-pressed="false">
+                    <span class="la-bg-icon">◑</span>
+                    <span>Gradient</span>
+                  </button>
+                  <button class="la-bg-btn" data-bg="mesh" aria-pressed="false">
+                    <span class="la-bg-icon">⬡</span>
+                    <span>Mesh</span>
+                  </button>
+                  <button class="la-bg-btn" data-bg="minimal" aria-pressed="false">
+                    <span class="la-bg-icon">□</span>
+                    <span>Minimal</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Card Style -->
+              <div class="la-form-group">
+                <label class="la-label">Link Card Style</label>
+                <div class="la-card-styles" role="group" aria-label="Link card style">
+                  <button class="la-card-style-btn active" data-style="glass" aria-pressed="true">Glass</button>
+                  <button class="la-card-style-btn" data-style="solid" aria-pressed="false">Solid</button>
+                  <button class="la-card-style-btn" data-style="outline" aria-pressed="false">Outline</button>
+                  <button class="la-card-style-btn" data-style="soft" aria-pressed="false">Soft</button>
+                </div>
+              </div>
+
+              <!-- Font Style -->
+              <div class="la-form-group">
+                <label class="la-label">Typography</label>
+                <div class="la-font-options" role="group" aria-label="Typography style">
+                  <button class="la-font-btn active" data-font="editorial" aria-pressed="true">
+                    <span style="font-family: 'Cormorant Garamond', serif;">Aa</span>
+                    <span>Editorial</span>
+                  </button>
+                  <button class="la-font-btn" data-font="modern" aria-pressed="false">
+                    <span style="font-family: 'DM Sans', sans-serif; font-weight: 600;">Aa</span>
+                    <span>Modern</span>
+                  </button>
+                  <button class="la-font-btn" data-font="mono" aria-pressed="false">
+                    <span style="font-family: 'DM Mono', monospace;">Aa</span>
+                    <span>Mono</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Panel: Website+ -->
+          <div class="la-tab-panel" id="tab-panel-website" role="tabpanel" aria-labelledby="tab-website">
+            <div class="la-editor__section">
+              <!-- Mini Website Toggle -->
+              <div class="la-toggle-card" id="mini-website-toggle-card">
+                <div class="la-toggle-card__text">
+                  <h3 class="la-toggle-card__title">Mini Website Mode</h3>
+                  <p class="la-toggle-card__desc">Transform your link page into a stunning personal website with About, Gallery, and Contact sections.</p>
+                </div>
+                <label class="la-toggle" aria-label="Enable mini website mode">
+                  <input type="checkbox" id="mini-website-toggle" role="switch" />
+                  <span class="la-toggle__track"></span>
+                </label>
+              </div>
+
+              <!-- Mini Website Sections (shown when toggled) -->
+              <div id="mini-website-sections" class="hidden">
+                <div class="la-form-group">
+                  <label for="about-text" class="la-label">About Section</label>
+                  <textarea id="about-text" class="la-input la-textarea" placeholder="A longer story about you, your mission, and what you create…" rows="4"></textarea>
+                </div>
+
+                <div class="la-form-group">
+                  <label class="la-label">Gallery Images</label>
+                  <div id="gallery-drop-zone" class="la-gallery-drop" role="button" tabindex="0" aria-label="Upload gallery images">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <path d="M3 9l4-4 4 4 4-4 4 4"/>
+                      <circle cx="8.5" cy="13.5" r="1.5"/>
+                    </svg>
+                    <p>Drop images or click to upload</p>
+                    <input type="file" id="gallery-files" accept="image/*" multiple class="sr-only" />
+                  </div>
+                  <div id="gallery-preview" class="la-gallery-preview"></div>
+                </div>
+
+                <div class="la-form-group">
+                  <label class="la-label">Contact Form</label>
+                  <label class="la-checkbox-row">
+                    <input type="checkbox" id="show-contact" checked />
+                    <span>Show contact form on page</span>
+                  </label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Save + Share Panel (sticky bottom) -->
+          <div class="la-editor__footer">
+            <button class="la-btn la-btn--primary" id="save-page-btn" aria-label="Save this page">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Save
+            </button>
+            <button class="la-btn la-btn--ghost" id="copy-link-btn" aria-label="Export page as HTML file">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export Page
+            </button>
+          </div>
+        </aside>
+
+        <!-- ── RIGHT: Live Preview ── -->
+        <div class="la-preview-panel" aria-label="Live preview">
+          <div class="la-preview-device">
+            <!-- Phone frame -->
+            <div class="la-phone-frame" role="presentation">
+              <div class="la-phone-notch" aria-hidden="true"></div>
+              <div class="la-phone-screen" id="phone-screen">
+                <!-- Live preview rendered here by JS -->
+                <div id="live-preview" class="la-page-preview"></div>
+              </div>
+            </div>
+          </div>
+          <p class="la-preview-hint" aria-live="polite">Live preview updates as you type</p>
+
+          <!-- Preview mode toggle -->
+          <div class="la-preview-mode" role="group" aria-label="Preview device">
+            <button class="la-device-btn active" data-device="mobile" aria-pressed="true" aria-label="Mobile preview">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                <line x1="12" y1="18" x2="12.01" y2="18"/>
+              </svg>
+            </button>
+            <button class="la-device-btn" data-device="desktop" aria-pressed="false" aria-label="Desktop preview">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /la-builder -->
+    </section>
+
+    <!-- ─────────────────────────────────────────
+         VIEW: PAGES MANAGER
+    ───────────────────────────────────────── -->
+    <section id="view-pages" class="la-view" aria-labelledby="pages-heading">
+      <div class="la-pages-manager">
+        <div class="la-pages-manager__header">
+          <h2 id="pages-heading" class="la-pages-manager__title">Your Pages</h2>
+          <button class="la-btn la-btn--primary" id="new-page-btn" aria-label="Create a new page">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            New Page
+          </button>
+        </div>
+        <div id="pages-grid" class="la-pages-grid">
+          <!-- Page cards injected by JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════
+       MODAL: AI SUGGESTIONS OVERLAY
+  ═══════════════════════════════════════════════════ -->
+  <div id="ai-modal" class="la-modal" role="dialog" aria-modal="true" aria-labelledby="ai-modal-title" hidden>
+    <div class="la-modal__backdrop" id="ai-modal-backdrop"></div>
+    <div class="la-modal__box">
+      <button class="la-modal__close" id="ai-modal-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="la-ai-icon" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </div>
+      <h3 id="ai-modal-title" class="la-modal__title">AI Suggestions</h3>
+      <div id="ai-suggestions-content" class="la-ai-suggestions" aria-live="polite">
+        <!-- Suggestions rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       TOAST NOTIFICATIONS
+  ═══════════════════════════════════════════════════ -->
+  <div id="toast-container" class="la-toast-container" aria-live="polite" aria-atomic="true" role="status"></div>
+
+  <!-- ═══════════════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════════════ -->
+  <footer class="la-app-footer" aria-label="Site footer">
+    <span>Crafted with</span>
+    <span class="la-footer-heart" aria-hidden="true">♥</span>
+    <span>by</span>
+    <a href="https://blackbirdo.com" target="_blank" rel="noopener noreferrer" class="la-footer-link">
+      blackbirdo.com
+    </a>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════
+       SCRIPTS (modules, bottom of body)
+  ═══════════════════════════════════════════════════ -->
+  <script src="js/utils.js"></script>
+  <script src="js/theme-manager.js"></script>
+  <script src="js/link-manager.js"></script>
+  <script src="js/ai-suggestions.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
