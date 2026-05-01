@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkAura — Loading…</title>
+  <meta name="robots" content="noindex" />
+  <style>
+    /* ── Loading Screen ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0c0c0e;
+      color: #f0ede8;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .loader-logo {
+      font-family: Georgia, serif;
+      font-size: 1.5rem;
+      font-style: italic;
+      color: #c4842a;
+      letter-spacing: -0.01em;
+    }
+
+    .loader-logo span { font-style: normal; color: #f0ede8; }
+
+    .spinner {
+      width: 32px; height: 32px;
+      border: 2px solid rgba(196,132,42,0.2);
+      border-top-color: #c4842a;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .loader-text {
+      font-size: 0.8rem;
+      color: rgba(240,237,232,0.4);
+      letter-spacing: 0.06em;
+    }
+
+    .error-box {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+      max-width: 380px;
+      padding: 2rem;
+    }
+
+    .error-box.show { display: flex; }
+
+    .error-icon {
+      font-size: 2.5rem;
+      opacity: 0.4;
+    }
+
+    .error-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .error-msg {
+      font-size: 0.8rem;
+      color: rgba(240,237,232,0.5);
+      line-height: 1.6;
+    }
+
+    .error-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #c4842a;
+      color: #0c0c0e;
+      border: none;
+      border-radius: 10px;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 0.25rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div class="loader" id="loader">
+    <div class="loader-logo"><span>Link</span>Aura</div>
+    <div class="spinner"></div>
+    <p class="loader-text">Loading your page…</p>
+  </div>
+
+  <div class="error-box" id="error-box">
+    <div class="error-icon">✦</div>
+    <h1 class="error-title">Page not found</h1>
+    <p class="error-msg" id="error-msg">
+      This LinkAura page could not be loaded. The link may be expired or invalid.
+    </p>
+    <a href="./index.html" class="error-btn">Create your own LinkAura →</a>
+  </div>
+
+  <div id="page-container" style="display:none;width:100%;min-height:100dvh;"></div>
+
+  <script>
+    (function () {
+      // ── Parse ?id= from URL ──
+      const params = new URLSearchParams(window.location.search);
+      const binId  = params.get('id');
+
+      if (!binId) {
+        showError('No page ID provided in the URL.');
+        return;
+      }
+
+      // ── Fetch from JSONbin ──
+      fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', {
+        headers: {
+          // Public bins don't need an API key to read
+          'X-Bin-Meta': 'false',
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(data => {
+        const html = data?.record?.html;
+        if (!html) throw new Error('No HTML content in this bin.');
+
+        // ── Render the page inside a seamless iframe ──
+        document.getElementById('loader').style.display = 'none';
+        const container = document.getElementById('page-container');
+        container.style.display = 'block';
+
+        // Use srcdoc iframe for clean isolated rendering
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = [
+          'width:100%',
+          'min-height:100dvh',
+          'border:none',
+          'display:block',
+          'background:transparent',
+        ].join(';');
+        iframe.setAttribute('title', 'LinkAura Page');
+        iframe.setAttribute('scrolling', 'yes');
+        iframe.srcdoc = html;
+
+        // Auto-resize iframe to content height
+        iframe.onload = function () {
+          try {
+            const body = iframe.contentDocument?.body;
+            if (body) {
+              const resize = () => {
+                iframe.style.height = body.scrollHeight + 'px';
+              };
+              resize();
+              new ResizeObserver(resize).observe(body);
+            }
+
+            // Set page title from iframe
+            const title = iframe.contentDocument?.title;
+            if (title) document.title = title + ' — LinkAura';
+          } catch (e) {
+            // Cross-origin — ignore
+          }
+        };
+
+        container.appendChild(iframe);
+      })
+      .catch(err => {
+        console.error('[LinkAura viewer]', err);
+        showError('Could not load the page: ' + err.message);
+      });
+
+      function showError(msg) {
+        document.getElementById('loader').style.display = 'none';
+        const box = document.getElementById('error-box');
+        box.classList.add('show');
+        const msgEl = document.getElementById('error-msg');
+        if (msgEl && msg) msgEl.textContent = msg;
+      }
+    })();
+  </script>
+</body>
+</html>
