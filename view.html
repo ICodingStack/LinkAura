@@ -3,199 +3,283 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LinkAura — Loading…</title>
+  <title>LinkAura</title>
   <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
   <style>
-    /* ── Loading Screen ── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: #0c0c0e;
-      color: #f0ede8;
-      font-family: 'DM Sans', system-ui, sans-serif;
-      min-height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .loader {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.25rem;
-      animation: fadeIn 0.4s ease;
-    }
-
-    .loader-logo {
-      font-family: Georgia, serif;
-      font-size: 1.5rem;
-      font-style: italic;
-      color: #c4842a;
-      letter-spacing: -0.01em;
-    }
-
-    .loader-logo span { font-style: normal; color: #f0ede8; }
-
-    .spinner {
-      width: 32px; height: 32px;
-      border: 2px solid rgba(196,132,42,0.2);
-      border-top-color: #c4842a;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    .loader-text {
-      font-size: 0.8rem;
-      color: rgba(240,237,232,0.4);
-      letter-spacing: 0.06em;
-    }
-
-    .error-box {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      text-align: center;
-      max-width: 380px;
-      padding: 2rem;
-    }
-
-    .error-box.show { display: flex; }
-
-    .error-icon {
-      font-size: 2.5rem;
-      opacity: 0.4;
-    }
-
-    .error-title {
-      font-size: 1.1rem;
-      font-weight: 500;
-    }
-
-    .error-msg {
-      font-size: 0.8rem;
-      color: rgba(240,237,232,0.5);
-      line-height: 1.6;
-    }
-
-    .error-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: #c4842a;
-      color: #0c0c0e;
-      border: none;
-      border-radius: 10px;
-      padding: 0.6rem 1.25rem;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-      margin-top: 0.25rem;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#0c0c0e;color:#f0ede8;font-family:'DM Sans',system-ui,sans-serif;min-height:100dvh;overflow-x:hidden}
+#loader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem;background:#0c0c0e;z-index:999;transition:opacity .4s ease}
+#loader.hiding{opacity:0;pointer-events:none}
+.loader-logo{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-style:italic;color:#c4842a}
+.loader-logo span{font-style:normal;color:#f0ede8}
+.spinner{width:32px;height:32px;border:2px solid rgba(196,132,42,.2);border-top-color:#c4842a;border-radius:50%;animation:spin .7s linear infinite}
+.loader-text{font-size:.72rem;color:rgba(240,237,232,.35);letter-spacing:.08em;text-transform:uppercase}
+#error-box{display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;gap:1rem;text-align:center;padding:2rem}
+#error-box.show{display:flex}
+.error-icon{font-size:2.5rem;opacity:.3}
+.error-title{font-size:1.2rem;font-weight:500}
+.error-msg{font-size:.8rem;color:rgba(240,237,232,.45);line-height:1.6;max-width:340px}
+.error-btn{display:inline-flex;align-items:center;background:#c4842a;color:#0c0c0e;border:none;border-radius:12px;padding:.65rem 1.5rem;font-size:.875rem;font-weight:500;cursor:pointer;text-decoration:none;margin-top:.5rem}
+#bg-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.55}
+#page-wrap{position:relative;z-index:1;min-height:100dvh;display:none;flex-direction:column;align-items:center;padding:3rem 1.25rem 5rem;gap:1rem;max-width:500px;margin:0 auto}
+.la-avatar{width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;border:2px solid var(--accent,#c4842a);box-shadow:0 0 28px var(--accent-glow,rgba(196,132,42,.3));background:rgba(255,255,255,.05);transition:transform .3s ease}
+.la-avatar:hover{transform:scale(1.04)}
+.la-avatar img{width:100%;height:100%;object-fit:cover}
+.la-name{font-size:clamp(1.6rem,5vw,2.2rem);font-weight:500;text-align:center;line-height:1.15;letter-spacing:-.02em}
+.la-bio{font-size:.9rem;color:var(--text-secondary,rgba(240,237,232,.55));text-align:center;line-height:1.65;max-width:380px}
+.la-socials{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+.la-social-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:50%;font-size:1.05rem;text-decoration:none;transition:transform .2s ease,background .2s ease}
+.la-social-btn:hover{transform:scale(1.12);background:var(--accent-dim,rgba(196,132,42,.18))}
+.la-links{width:100%;display:flex;flex-direction:column;gap:.625rem}
+.la-link-card{width:100%;display:flex;align-items:center;gap:.75rem;padding:.9rem 1.125rem;border-radius:14px;text-decoration:none;font-size:.9rem;font-weight:500;color:var(--text-primary,#f0ede8);transition:transform .2s ease,box-shadow .2s ease;cursor:pointer}
+.la-link-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.la-link-card.style-glass{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.la-link-card.style-solid{background:var(--accent,#c4842a);color:#0c0c0e;border:none}
+.la-link-card.style-outline{background:transparent;border:1.5px solid var(--accent,#c4842a);color:var(--accent,#c4842a)}
+.la-link-card.style-soft{background:var(--accent-dim,rgba(196,132,42,.18));border:1px solid var(--accent-dim,rgba(196,132,42,.18));color:var(--accent-light,#d49d45)}
+.la-link-icon{font-size:1.15rem;width:32px;text-align:center;flex-shrink:0}
+.la-link-title{flex:1}
+.la-link-arrow{opacity:.35;font-size:.7rem;margin-left:auto}
+.la-section-heading{align-self:flex-start;width:100%;font-size:.72rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent,#c4842a);margin-top:.75rem;padding-bottom:.5rem;border-bottom:1px solid rgba(196,132,42,.2)}
+.la-about{font-size:.875rem;color:var(--text-secondary,rgba(240,237,232,.55));line-height:1.7;text-align:center;max-width:420px}
+.la-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:.375rem;width:100%}
+.la-gallery img{aspect-ratio:1;object-fit:cover;border-radius:8px;width:100%}
+.la-contact-form{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.25rem;display:flex;flex-direction:column;gap:.625rem}
+.la-contact-form input,.la-contact-form textarea{background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.65rem .875rem;font-size:.8rem;color:#f0ede8;font-family:'DM Sans',sans-serif;width:100%;outline:none;transition:border-color .15s ease}
+.la-contact-form input:focus,.la-contact-form textarea:focus{border-color:var(--accent,#c4842a)}
+.la-contact-form textarea{resize:vertical;min-height:80px}
+.la-contact-btn{background:var(--accent,#c4842a);color:#0c0c0e;border:none;border-radius:8px;padding:.7rem;font-size:.875rem;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s ease;width:100%}
+.la-contact-btn:hover{opacity:.88}
+#contact-sent{text-align:center;color:var(--accent,#c4842a);font-size:.8rem;display:none;padding:.25rem 0}
+.la-page-footer{margin-top:1.5rem;font-size:.65rem;color:rgba(240,237,232,.25);letter-spacing:.06em;display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;justify-content:center}
+.la-page-footer a{color:var(--accent,#c4842a);text-decoration:none;font-weight:500}
+.la-footer-heart{color:var(--accent,#c4842a);animation:hb 2.4s ease-in-out infinite;display:inline-block}
+.la-fade-in{animation:fadeUp .5s ease forwards;opacity:0}
+body.theme-light{background:#f7f5f2;color:#1a1714}
+body.theme-light .la-link-card.style-glass{background:rgba(255,255,255,.65);border-color:rgba(0,0,0,.08)}
+body.theme-light .la-contact-form input,body.theme-light .la-contact-form textarea{color:#1a1714;border-color:rgba(0,0,0,.1)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes hb{0%,100%{transform:scale(1)}14%{transform:scale(1.3)}28%{transform:scale(1)}42%{transform:scale(1.15)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
-  <div class="loader" id="loader">
+  <div id="loader">
     <div class="loader-logo"><span>Link</span>Aura</div>
     <div class="spinner"></div>
     <p class="loader-text">Loading your page…</p>
   </div>
-
-  <div class="error-box" id="error-box">
+  <div id="error-box">
     <div class="error-icon">✦</div>
     <h1 class="error-title">Page not found</h1>
-    <p class="error-msg" id="error-msg">
-      This LinkAura page could not be loaded. The link may be expired or invalid.
-    </p>
+    <p class="error-msg" id="error-msg">This LinkAura page could not be loaded.</p>
     <a href="./index.html" class="error-btn">Create your own LinkAura →</a>
   </div>
+  <canvas id="bg-canvas"></canvas>
+  <div id="page-wrap"></div>
+<script>
+(function(){
+'use strict';
+var esc=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+function showError(msg){
+  document.getElementById('loader').style.display='none';
+  var box=document.getElementById('error-box');box.classList.add('show');
+  var m=document.getElementById('error-msg');if(m&&msg)m.textContent=msg;
+}
+var binId=new URLSearchParams(window.location.search).get('id');
+if(!binId){showError('No page ID provided in the URL.');return;}
 
-  <div id="page-container" style="display:none;width:100%;min-height:100dvh;"></div>
+fetch('https://api.jsonbin.io/v3/b/'+binId+'/latest',{headers:{'X-Bin-Meta':'false'}})
+.then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+.then(function(data){
+  var page=data&&data.record&&data.record.page;
+  if(!page)throw new Error('No page data in bin. Please republish your page.');
+  renderPage(page);
+})
+.catch(function(err){
+  console.error('[LinkAura viewer]',err);
+  showError('Could not load: '+err.message);
+});
 
-  <script>
-    (function () {
-      // ── Parse ?id= from URL ──
-      const params = new URLSearchParams(window.location.search);
-      const binId  = params.get('id');
+function hexToRgba(hex,a){
+  try{var n=parseInt((hex||'#c4842a').replace('#',''),16);return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';}
+  catch(e){return 'rgba(196,132,42,'+a+')';}
+}
+function lighten(hex,pct){
+  try{var n=parseInt((hex||'#c4842a').replace('#',''),16);
+  var r=Math.min(255,(n>>16)+Math.round(255*pct/100));
+  var g=Math.min(255,((n>>8)&255)+Math.round(255*pct/100));
+  var b=Math.min(255,(n&255)+Math.round(255*pct/100));
+  return '#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1);}
+  catch(e){return hex;}
+}
+function setMeta(prop,content){
+  var el=document.querySelector('meta[property="'+prop+'"]');
+  if(!el){el=document.createElement('meta');el.setAttribute('property',prop);document.head.appendChild(el);}
+  el.setAttribute('content',content);
+}
 
-      if (!binId) {
-        showError('No page ID provided in the URL.');
-        return;
-      }
+function renderPage(p){
+  var accent=p.accent||'#c4842a';
+  var accentDim=hexToRgba(accent,0.18);
+  var accentGlow=hexToRgba(accent,0.3);
+  var isDark=(p.theme||'dark')==='dark';
+  var textPrim=isDark?'#f0ede8':'#1a1714';
+  var textSec=isDark?'rgba(240,237,232,0.55)':'rgba(26,23,20,0.55)';
 
-      // ── Fetch from JSONbin ──
-      fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', {
-        headers: {
-          // Public bins don't need an API key to read
-          'X-Bin-Meta': 'false',
+  var root=document.documentElement;
+  root.style.setProperty('--accent',accent);
+  root.style.setProperty('--accent-dim',accentDim);
+  root.style.setProperty('--accent-glow',accentGlow);
+  root.style.setProperty('--accent-light',lighten(accent,15));
+  root.style.setProperty('--text-primary',textPrim);
+  root.style.setProperty('--text-secondary',textSec);
+  if(!isDark){document.body.classList.add('theme-light');}
+  document.body.style.background=isDark?'#0c0c0e':'#f7f5f2';
+
+  document.title=(p.profileName||p.name||'LinkAura Page')+' — LinkAura';
+  setMeta('og:title',p.profileName||'LinkAura Page');
+  setMeta('og:description',p.bio||'My LinkAura page');
+  if(p.avatar)setMeta('og:image',p.avatar);
+
+  var fontMap={editorial:"'Cormorant Garamond', serif",modern:"'DM Sans', sans-serif",mono:"'DM Mono', monospace"};
+  var fontDisplay=fontMap[p.font]||fontMap.editorial;
+  var socialIcons={instagram:'📸',twitter:'𝕏',youtube:'▶️',tiktok:'🎵',linkedin:'💼',github:'🐙',spotify:'🎧',pinterest:'📌'};
+
+  var wrap=document.getElementById('page-wrap');
+  var delay=0.05;
+
+  function el(tag,cls,style,html){
+    var e=document.createElement(tag);
+    if(cls)e.className=cls;
+    if(style)e.style.cssText=style;
+    if(html!==undefined)e.innerHTML=html;
+    return e;
+  }
+  function fade(e,d){e.classList.add('la-fade-in');e.style.animationDelay=(d||delay)+'s';return e;}
+
+  /* Avatar */
+  var av=el('div','la-avatar');
+  av.innerHTML=p.avatar?('<img src="'+p.avatar+'" alt="'+esc(p.profileName)+'" />'):'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgba(240,237,232,0.3)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+  wrap.appendChild(fade(av,0.05));
+
+  /* Name */
+  if(p.profileName||p.name){
+    var name=el('h1','la-name','font-family:'+fontDisplay+';');
+    name.textContent=p.profileName||p.name;
+    wrap.appendChild(fade(name,0.1));
+  }
+
+  /* Bio */
+  if(p.bio){
+    var bio=el('p','la-bio');
+    bio.innerHTML=esc(p.bio).replace(/\n/g,'<br>');
+    wrap.appendChild(fade(bio,0.15));
+  }
+
+  /* Socials */
+  var socialEntries=Object.entries(p.socials||{}).filter(function(e){return e[1];});
+  if(socialEntries.length){
+    var soc=el('div','la-socials');
+    socialEntries.forEach(function(entry){
+      var k=entry[0],v=entry[1];
+      var href=v.startsWith('http')?v:'https://'+k+'.com/'+v.replace('@','');
+      var a=el('a','la-social-btn');
+      a.href=href;a.target='_blank';a.rel='noopener noreferrer';
+      a.setAttribute('aria-label',k);
+      a.textContent=socialIcons[k]||'🔗';
+      soc.appendChild(a);
+    });
+    wrap.appendChild(fade(soc,0.18));
+  }
+
+  /* Links */
+  var links=(p.links||[]).filter(function(l){return l.active!==false;});
+  if(links.length){
+    var linkWrap=el('div','la-links');
+    links.forEach(function(l,i){
+      var a=el('a','la-link-card style-'+(p.cardStyle||'glass'));
+      a.href=l.url||'#';a.target='_blank';a.rel='noopener noreferrer';
+      a.innerHTML='<span class="la-link-icon">'+(l.icon||'🔗')+'</span><span class="la-link-title">'+esc(l.title)+'</span><span class="la-link-arrow">↗</span>';
+      linkWrap.appendChild(a);
+    });
+    wrap.appendChild(fade(linkWrap,0.22));
+  }
+
+  /* Mini website */
+  if(p.miniWebsite){
+    var d=0.3;
+    if(p.aboutText){
+      var h1=el('div','la-section-heading');h1.textContent='About';wrap.appendChild(fade(h1,d));
+      var ab=el('p','la-about');ab.innerHTML=esc(p.aboutText).replace(/\n/g,'<br>');wrap.appendChild(fade(ab,d+.05));d+=.1;
+    }
+    if(p.gallery&&p.gallery.length){
+      var h2=el('div','la-section-heading');h2.textContent='Gallery';wrap.appendChild(fade(h2,d));
+      var gal=el('div','la-gallery');
+      p.gallery.slice(0,6).forEach(function(src){var img=document.createElement('img');img.src=src;img.alt='';img.loading='lazy';gal.appendChild(img);});
+      wrap.appendChild(fade(gal,d+.05));d+=.1;
+    }
+    if(p.showContact!==false){
+      var h3=el('div','la-section-heading');h3.textContent='Contact';wrap.appendChild(fade(h3,d));
+      var form=el('div','la-contact-form');
+      form.innerHTML='<input type="text" placeholder="Your name" /><input type="email" placeholder="Your email" /><textarea rows="3" placeholder="Your message"></textarea><button type="button" class="la-contact-btn" id="contact-send-btn">Send Message</button><p id="contact-sent">✓ Thank you! (connect a form service to receive real submissions)</p>';
+      wrap.appendChild(fade(form,d+.05));
+      document.addEventListener('click',function(ev){
+        if(ev.target&&ev.target.id==='contact-send-btn'){
+          var inputs=form.querySelectorAll('input,textarea');
+          inputs.forEach(function(i){i.value='';});
+          var sent=document.getElementById('contact-sent');
+          if(sent){sent.style.display='block';setTimeout(function(){sent.style.display='none';},4000);}
         }
-      })
-      .then(res => {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(data => {
-        const html = data?.record?.html;
-        if (!html) throw new Error('No HTML content in this bin.');
-
-        // ── Render the page inside a seamless iframe ──
-        document.getElementById('loader').style.display = 'none';
-        const container = document.getElementById('page-container');
-        container.style.display = 'block';
-
-        // Use srcdoc iframe for clean isolated rendering
-        const iframe = document.createElement('iframe');
-        iframe.style.cssText = [
-          'width:100%',
-          'min-height:100dvh',
-          'border:none',
-          'display:block',
-          'background:transparent',
-        ].join(';');
-        iframe.setAttribute('title', 'LinkAura Page');
-        iframe.setAttribute('scrolling', 'yes');
-        iframe.srcdoc = html;
-
-        // Auto-resize iframe to content height
-        iframe.onload = function () {
-          try {
-            const body = iframe.contentDocument?.body;
-            if (body) {
-              const resize = () => {
-                iframe.style.height = body.scrollHeight + 'px';
-              };
-              resize();
-              new ResizeObserver(resize).observe(body);
-            }
-
-            // Set page title from iframe
-            const title = iframe.contentDocument?.title;
-            if (title) document.title = title + ' — LinkAura';
-          } catch (e) {
-            // Cross-origin — ignore
-          }
-        };
-
-        container.appendChild(iframe);
-      })
-      .catch(err => {
-        console.error('[LinkAura viewer]', err);
-        showError('Could not load the page: ' + err.message);
       });
+    }
+  }
 
-      function showError(msg) {
-        document.getElementById('loader').style.display = 'none';
-        const box = document.getElementById('error-box');
-        box.classList.add('show');
-        const msgEl = document.getElementById('error-msg');
-        if (msgEl && msg) msgEl.textContent = msg;
-      }
-    })();
-  </script>
+  /* Footer */
+  var footer=el('div','la-page-footer');
+  footer.innerHTML='<span>Crafted with</span><span class="la-footer-heart">&#9829;</span><span>by</span><a href="https://blackbirdo.com" target="_blank" rel="noopener noreferrer">blackbirdo.com</a><span style="opacity:.4">&middot;</span><a href="https://github.com/ICodingStack/LinkAura" target="_blank" rel="noopener noreferrer">LinkAura</a>';
+  wrap.appendChild(fade(footer,0.45));
+
+  /* Show page */
+  wrap.style.display='flex';
+  var loader=document.getElementById('loader');
+  loader.classList.add('hiding');
+  setTimeout(function(){loader.style.display='none';},450);
+
+  /* Background */
+  if(!p.bg||p.bg==='particles')startParticles(accent);
+  else if(p.bg==='gradient'){
+    document.body.style.background='radial-gradient(ellipse at 20% 50%,'+hexToRgba(accent,.1)+' 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,'+hexToRgba(accent,.05)+' 0%,transparent 40%),'+(isDark?'#0c0c0e':'#f7f5f2');
+  }
+}
+
+function startParticles(accent){
+  var c=document.getElementById('bg-canvas');
+  var ctx=c.getContext('2d');
+  function resize(){c.width=innerWidth;c.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  var pts=[];for(var i=0;i<45;i++)pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,sx:(Math.random()-.5)*.25,sy:-(Math.random()*.35+.08),r:Math.random()*1.6+.3,o:Math.random()*.4+.06,t:0,ts:Math.random()*.012+.004,to:Math.random()*Math.PI*2});
+  var rgba=hexToRgba(accent,1);
+  function loop(){
+    ctx.clearRect(0,0,c.width,c.height);
+    pts.forEach(function(p){
+      p.x+=p.sx;p.y+=p.sy;p.t++;
+      if(p.y<-10||p.t>600){p.y=c.height+10;p.x=Math.random()*c.width;p.t=0;}
+      var tw=Math.sin(p.t*p.ts+p.to);
+      ctx.globalAlpha=Math.max(0,p.o*(0.6+0.4*tw));
+      ctx.fillStyle=rgba;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+    });
+    ctx.globalAlpha=1;requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+})();
+</script>
 </body>
 </html>
+ 
