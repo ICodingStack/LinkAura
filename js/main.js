@@ -4,53 +4,42 @@
  * profile management, pages manager, auto-save, and all UI event binding.
  */
 
-"use strict";
+'use strict';
 
 (function () {
   const {
-    $,
-    $$,
-    showToast,
-    slugify,
-    escapeHtml,
-    uid,
-    saveStorage,
-    loadStorage,
-    removeStorage,
-    listStorageKeys,
-    copyToClipboard,
-    fileToBase64,
-    debounce,
-    timeAgo,
+    $, $$, showToast, slugify, escapeHtml, uid,
+    saveStorage, loadStorage, removeStorage, listStorageKeys,
+    copyToClipboard, fileToBase64, debounce, timeAgo,
   } = window.LinkAuraUtils;
 
   /* ─────────────────────────────────────────
      App State
   ───────────────────────────────────────── */
 
-  let activePageId = loadStorage("activePageId", null);
-  let currentCardStyle = loadStorage("cardStyle", "glass");
-  let currentFont = loadStorage("font", "editorial");
+  let activePageId = loadStorage('activePageId', null);
+  let currentCardStyle = loadStorage('cardStyle', 'glass');
+  let currentFont = loadStorage('font', 'editorial');
   let isMiniWebsite = false;
   let galleryImages = [];
   let allPages = {};
 
   const DEFAULT_PAGE = {
     id: null,
-    name: "My LinkAura",
-    username: "",
-    profileName: "",
-    bio: "",
+    name: 'My LinkAura',
+    username: '',
+    profileName: '',
+    bio: '',
     avatar: null,
     socials: {},
     links: [],
-    accent: "#c4842a",
-    theme: "dark",
-    bg: "particles",
-    cardStyle: "glass",
-    font: "editorial",
+    accent: '#c4842a',
+    theme: 'dark',
+    bg: 'particles',
+    cardStyle: 'glass',
+    font: 'editorial',
     miniWebsite: false,
-    aboutText: "",
+    aboutText: '',
     gallery: [],
     showContact: true,
     createdAt: Date.now(),
@@ -63,8 +52,8 @@
 
   function loadAllPages() {
     allPages = {};
-    const keys = listStorageKeys().filter((k) => k.startsWith("page_"));
-    keys.forEach((k) => {
+    const keys = listStorageKeys().filter(k => k.startsWith('page_'));
+    keys.forEach(k => {
       const page = loadStorage(k);
       if (page?.id) allPages[page.id] = page;
     });
@@ -88,23 +77,23 @@
 
   function getCurrentPageData() {
     return {
-      id: activePageId || uid("page"),
-      name: $("#profile-name")?.value?.trim() || "My LinkAura",
-      username: $("#profile-username")?.value?.trim() || "",
-      profileName: $("#profile-name")?.value?.trim() || "",
-      bio: $("#profile-bio")?.value?.trim() || "",
-      avatar: $("#avatar-preview img")?.src || null,
+      id: activePageId || uid('page'),
+      name: $('#profile-name')?.value?.trim() || 'My LinkAura',
+      username: $('#profile-username')?.value?.trim() || '',
+      profileName: $('#profile-name')?.value?.trim() || '',
+      bio: $('#profile-bio')?.value?.trim() || '',
+      avatar: $('#avatar-preview img')?.src || null,
       socials: window.LinkAuraLinks?.getSocialData() || {},
       links: window.LinkAuraLinks?.getLinks() || [],
-      accent: window.LinkAuraTheme?.getCurrentAccent() || "#c4842a",
-      theme: window.LinkAuraTheme?.getCurrentTheme() || "dark",
-      bg: window.LinkAuraTheme?.getCurrentBg() || "particles",
+      accent: window.LinkAuraTheme?.getCurrentAccent() || '#c4842a',
+      theme: window.LinkAuraTheme?.getCurrentTheme() || 'dark',
+      bg: window.LinkAuraTheme?.getCurrentBg() || 'particles',
       cardStyle: currentCardStyle,
       font: currentFont,
       miniWebsite: isMiniWebsite,
-      aboutText: $("#about-text")?.value?.trim() || "",
+      aboutText: $('#about-text')?.value?.trim() || '',
       gallery: galleryImages,
-      showContact: $("#show-contact")?.checked ?? true,
+      showContact: $('#show-contact')?.checked ?? true,
       createdAt: getActivePage()?.createdAt || Date.now(),
       updatedAt: Date.now(),
     };
@@ -115,14 +104,14 @@
     activePageId = page.id;
 
     // Profile fields
-    const nameEl = $("#profile-name");
-    const userEl = $("#profile-username");
-    const bioEl = $("#profile-bio");
+    const nameEl = $('#profile-name');
+    const userEl = $('#profile-username');
+    const bioEl = $('#profile-bio');
 
-    if (nameEl) nameEl.value = page.profileName || "";
-    if (userEl) userEl.value = page.username || "";
+    if (nameEl) nameEl.value = page.profileName || '';
+    if (userEl) userEl.value = page.username || '';
     if (bioEl) {
-      bioEl.value = page.bio || "";
+      bioEl.value = page.bio || '';
       updateBioCount();
     }
 
@@ -136,25 +125,25 @@
     window.LinkAuraLinks?.loadLinks(page.links || []);
 
     // Design
-    window.LinkAuraTheme?.applyAccent(page.accent || "#c4842a");
-    window.LinkAuraTheme?.applyBackground(page.bg || "particles");
-    applyCardStyle(page.cardStyle || "glass");
-    applyFont(page.font || "editorial");
+    window.LinkAuraTheme?.applyAccent(page.accent || '#c4842a');
+    window.LinkAuraTheme?.applyBackground(page.bg || 'particles');
+    applyCardStyle(page.cardStyle || 'glass');
+    applyFont(page.font || 'editorial');
 
     // Mini website
     isMiniWebsite = page.miniWebsite || false;
-    const toggle = $("#mini-website-toggle");
+    const toggle = $('#mini-website-toggle');
     if (toggle) toggle.checked = isMiniWebsite;
-    const sections = $("#mini-website-sections");
-    if (sections) sections.classList.toggle("hidden", !isMiniWebsite);
+    const sections = $('#mini-website-sections');
+    if (sections) sections.classList.toggle('hidden', !isMiniWebsite);
 
-    const aboutEl = $("#about-text");
-    if (aboutEl) aboutEl.value = page.aboutText || "";
+    const aboutEl = $('#about-text');
+    if (aboutEl) aboutEl.value = page.aboutText || '';
 
     galleryImages = page.gallery || [];
     renderGalleryPreview();
 
-    const contactEl = $("#show-contact");
+    const contactEl = $('#show-contact');
     if (contactEl) contactEl.checked = page.showContact ?? true;
 
     // Update username preview
@@ -168,16 +157,16 @@
      View Routing
   ───────────────────────────────────────── */
 
-  const VIEWS = ["landing", "ai-onboard", "builder", "pages"];
+  const VIEWS = ['landing', 'ai-onboard', 'builder', 'pages'];
 
   function navigateTo(viewId) {
     // 1. Synchronously hide ALL views (no RAF, no flash)
-    $$(".la-view").forEach((v) => v.classList.remove("active"));
+    $$('.la-view').forEach(v => v.classList.remove('active'));
 
     // 2. Show only the target — CSS !important on .la-view ensures it's hidden
-    const target = document.getElementById("view-" + viewId);
+    const target = document.getElementById('view-' + viewId);
     if (target) {
-      target.classList.add("active");
+      target.classList.add('active');
       target.scrollTop = 0;
     }
 
@@ -185,8 +174,8 @@
     syncNavButtons(viewId);
 
     // 4. View-specific hooks
-    if (viewId === "builder") refreshPreview();
-    if (viewId === "pages") renderPagesGrid();
+    if (viewId === 'builder') refreshPreview();
+    if (viewId === 'pages')   renderPagesGrid();
   }
 
   /* ─────────────────────────────────────────
@@ -196,12 +185,12 @@
   const refreshPreview = debounce(_refreshPreview, 80);
 
   function _refreshPreview() {
-    const container = $("#live-preview");
+    const container = $('#live-preview');
     if (!container) return;
 
     const page = getCurrentPageData();
-    const accent = window.LinkAuraTheme?.getCurrentAccent() || "#c4842a";
-    const theme = window.LinkAuraTheme?.getCurrentTheme() || "dark";
+    const accent = window.LinkAuraTheme?.getCurrentAccent() || '#c4842a';
+    const theme = window.LinkAuraTheme?.getCurrentTheme() || 'dark';
 
     // Build CSS vars for preview
     const { hexToRgba } = window.LinkAuraUtils;
@@ -217,23 +206,14 @@
     const fontFamily = fontMap[page.font] || fontMap.editorial;
 
     // Preview HTML
-    container.innerHTML = buildPreviewHTML(
-      page,
-      accent,
-      accentDim,
-      accentGlow,
-      fontFamily,
-    );
+    container.innerHTML = buildPreviewHTML(page, accent, accentDim, accentGlow, fontFamily);
 
     // Apply preview theme vars
-    const previewBg = theme === "dark" ? "#0e0e11" : "#f7f5f2";
-    const textColor = theme === "dark" ? "#f0ede8" : "#1a1714";
-    const textSecondary =
-      theme === "dark" ? "rgba(240,237,232,0.55)" : "rgba(26,23,20,0.55)";
-    const glassBg =
-      theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.6)";
-    const glassBorder =
-      theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+    const previewBg = theme === 'dark' ? '#0e0e11' : '#f7f5f2';
+    const textColor = theme === 'dark' ? '#f0ede8' : '#1a1714';
+    const textSecondary = theme === 'dark' ? 'rgba(240,237,232,0.55)' : 'rgba(26,23,20,0.55)';
+    const glassBg = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.6)';
+    const glassBorder = theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
 
     container.style.cssText = `
       --accent: ${accent};
@@ -263,46 +243,27 @@
 
     // Social icons for preview
     const socialEntries = Object.entries(socials).filter(([, v]) => v);
-    const socialIcons = {
-      instagram: "📸",
-      twitter: "𝕏",
-      youtube: "▶️",
-      tiktok: "🎵",
-      linkedin: "💼",
-      github: "🐙",
-      spotify: "🎧",
-      pinterest: "📌",
-    };
-    const socialsHtml = socialEntries.length
-      ? `
+    const socialIcons = { instagram:'📸', twitter:'𝕏', youtube:'▶️', tiktok:'🎵',
+                          linkedin:'💼', github:'🐙', spotify:'🎧', pinterest:'📌' };
+    const socialsHtml = socialEntries.length ? `
       <div class="preview-socials">
-        ${socialEntries
-          .slice(0, 6)
-          .map(
-            ([k]) =>
-              `<a class="preview-social-btn" href="#" aria-label="${k}">${socialIcons[k] || "🔗"}</a>`,
-          )
-          .join("")}
-      </div>`
-      : "";
+        ${socialEntries.slice(0, 6).map(([k]) =>
+          `<a class="preview-social-btn" href="#" aria-label="${k}">${socialIcons[k] || '🔗'}</a>`
+        ).join('')}
+      </div>` : '';
 
     // Links HTML
-    const linksHtml = links
-      .filter((l) => l.active)
-      .map(
-        (link) => `
+    const linksHtml = links.filter(l => l.active).map(link => `
       <a class="preview-link-card style-${page.cardStyle}" href="${escapeHtml(link.url)}"
          target="_blank" rel="noopener noreferrer">
         <span class="preview-link-icon">${link.icon}</span>
         <span class="preview-link-title">${escapeHtml(link.title)}</span>
         <span style="margin-left:auto;opacity:0.4;font-size:0.65rem;">↗</span>
       </a>
-    `,
-      )
-      .join("");
+    `).join('');
 
     // Mini website sections
-    let miniHtml = "";
+    let miniHtml = '';
     if (page.miniWebsite) {
       if (page.aboutText) {
         miniHtml += `
@@ -314,13 +275,9 @@
         miniHtml += `
           <div class="preview-section-heading" style="font-family:${fontFamily}">Gallery</div>
           <div class="preview-gallery">
-            ${page.gallery
-              .slice(0, 6)
-              .map(
-                (src) =>
-                  `<img src="${src}" alt="Gallery image" loading="lazy" />`,
-              )
-              .join("")}
+            ${page.gallery.slice(0, 6).map(src =>
+              `<img src="${src}" alt="Gallery image" loading="lazy" />`
+            ).join('')}
           </div>
         `;
       }
@@ -342,21 +299,17 @@
         ${avatarHtml}
       </div>
       <div class="preview-name" style="font-family:${fontFamily};">
-        ${escapeHtml(page.profileName || "Your Name")}
+        ${escapeHtml(page.profileName || 'Your Name')}
       </div>
-      ${page.bio ? `<p class="preview-bio">${escapeHtml(page.bio)}</p>` : ""}
+      ${page.bio ? `<p class="preview-bio">${escapeHtml(page.bio)}</p>` : ''}
       ${socialsHtml}
-      ${
-        links.length
-          ? `<div class="preview-links">${linksHtml}</div>`
-          : `
+      ${links.length ? `<div class="preview-links">${linksHtml}</div>` : `
         <p style="font-size:0.72rem;color:var(--text-secondary);text-align:center;opacity:0.5;margin-top:0.5rem;">
           Add links in the editor →
-        </p>`
-      }
+        </p>`}
       ${miniHtml}
       <p style="font-size:0.6rem;color:var(--text-secondary);opacity:0.3;margin-top:1rem;letter-spacing:0.08em;">
-        linkaura.io/${escapeHtml(page.username || "you")}
+        linkaura.io/${escapeHtml(page.username || 'you')}
       </p>
     `;
   }
@@ -366,18 +319,18 @@
   ───────────────────────────────────────── */
 
   function initEditorTabs() {
-    const tabs = $$(".la-tab");
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
+    const tabs = $$('.la-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
         const target = tab.dataset.tab;
 
-        tabs.forEach((t) => {
-          t.classList.toggle("active", t.dataset.tab === target);
-          t.setAttribute("aria-selected", t.dataset.tab === target);
+        tabs.forEach(t => {
+          t.classList.toggle('active', t.dataset.tab === target);
+          t.setAttribute('aria-selected', t.dataset.tab === target);
         });
 
-        $$(".la-tab-panel").forEach((panel) => {
-          panel.classList.toggle("active", panel.id === `tab-panel-${target}`);
+        $$('.la-tab-panel').forEach(panel => {
+          panel.classList.toggle('active', panel.id === `tab-panel-${target}`);
         });
       });
     });
@@ -389,21 +342,18 @@
 
   function bindProfileForm() {
     // Name
-    const nameEl = $("#profile-name");
+    const nameEl = $('#profile-name');
     if (nameEl) {
-      nameEl.addEventListener(
-        "input",
-        debounce(() => {
-          updateUsernamePreview();
-          refreshPreview();
-        }, 150),
-      );
+      nameEl.addEventListener('input', debounce(() => {
+        updateUsernamePreview();
+        refreshPreview();
+      }, 150));
     }
 
     // Username
-    const userEl = $("#profile-username");
+    const userEl = $('#profile-username');
     if (userEl) {
-      userEl.addEventListener("input", () => {
+      userEl.addEventListener('input', () => {
         userEl.value = slugify(userEl.value);
         updateUsernamePreview();
         refreshPreview();
@@ -411,41 +361,41 @@
     }
 
     // Bio
-    const bioEl = $("#profile-bio");
+    const bioEl = $('#profile-bio');
     if (bioEl) {
-      bioEl.addEventListener("input", () => {
+      bioEl.addEventListener('input', () => {
         updateBioCount();
         refreshPreview();
       });
     }
 
     // Avatar upload
-    const avatarZone = $("#avatar-upload-zone");
-    const avatarFile = $("#avatar-file");
+    const avatarZone = $('#avatar-upload-zone');
+    const avatarFile = $('#avatar-file');
 
     if (avatarZone) {
-      avatarZone.addEventListener("click", () => avatarFile?.click());
-      avatarZone.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") avatarFile?.click();
+      avatarZone.addEventListener('click', () => avatarFile?.click());
+      avatarZone.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') avatarFile?.click();
       });
       // Drag over zone
-      avatarZone.addEventListener("dragover", (e) => {
+      avatarZone.addEventListener('dragover', e => {
         e.preventDefault();
-        avatarZone.style.borderColor = "var(--accent)";
+        avatarZone.style.borderColor = 'var(--accent)';
       });
-      avatarZone.addEventListener("dragleave", () => {
-        avatarZone.style.borderColor = "";
+      avatarZone.addEventListener('dragleave', () => {
+        avatarZone.style.borderColor = '';
       });
-      avatarZone.addEventListener("drop", async (e) => {
+      avatarZone.addEventListener('drop', async e => {
         e.preventDefault();
-        avatarZone.style.borderColor = "";
+        avatarZone.style.borderColor = '';
         const file = e.dataTransfer.files[0];
-        if (file?.type.startsWith("image/")) await handleAvatarFile(file);
+        if (file?.type.startsWith('image/')) await handleAvatarFile(file);
       });
     }
 
     if (avatarFile) {
-      avatarFile.addEventListener("change", async () => {
+      avatarFile.addEventListener('change', async () => {
         const file = avatarFile.files[0];
         if (file) await handleAvatarFile(file);
       });
@@ -458,29 +408,29 @@
       setAvatarPreview(base64);
       refreshPreview();
     } catch {
-      showToast("Failed to load image", "error");
+      showToast('Failed to load image', 'error');
     }
   }
 
   function setAvatarPreview(src) {
-    const preview = $("#avatar-preview");
+    const preview = $('#avatar-preview');
     if (!preview) return;
     preview.innerHTML = `<img src="${src}" alt="Profile photo" />`;
   }
 
   function updateBioCount() {
-    const bioEl = $("#profile-bio");
-    const countEl = $("#bio-count");
+    const bioEl = $('#profile-bio');
+    const countEl = $('#bio-count');
     if (bioEl && countEl) countEl.textContent = bioEl.value.length;
   }
 
   function updateUsernamePreview() {
-    const nameEl = $("#profile-name");
-    const userEl = $("#profile-username");
-    const preview = $("#username-preview");
+    const nameEl = $('#profile-name');
+    const userEl = $('#profile-username');
+    const preview = $('#username-preview');
     if (!preview) return;
-    const val = userEl?.value || slugify(nameEl?.value || "") || "you";
-    preview.textContent = val || "you";
+    const val = userEl?.value || slugify(nameEl?.value || '') || 'you';
+    preview.textContent = val || 'you';
   }
 
   /* ─────────────────────────────────────────
@@ -489,18 +439,18 @@
 
   function applyCardStyle(style) {
     currentCardStyle = style;
-    saveStorage("cardStyle", style);
-    $$(".la-card-style-btn").forEach((btn) => {
+    saveStorage('cardStyle', style);
+    $$('.la-card-style-btn').forEach(btn => {
       const active = btn.dataset.style === style;
-      btn.classList.toggle("active", active);
-      btn.setAttribute("aria-pressed", active);
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active);
     });
     refreshPreview();
   }
 
   function bindCardStyleButtons() {
-    $$(".la-card-style-btn").forEach((btn) => {
-      btn.addEventListener("click", () => applyCardStyle(btn.dataset.style));
+    $$('.la-card-style-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyCardStyle(btn.dataset.style));
     });
   }
 
@@ -510,18 +460,18 @@
 
   function applyFont(font) {
     currentFont = font;
-    saveStorage("font", font);
-    $$(".la-font-btn").forEach((btn) => {
+    saveStorage('font', font);
+    $$('.la-font-btn').forEach(btn => {
       const active = btn.dataset.font === font;
-      btn.classList.toggle("active", active);
-      btn.setAttribute("aria-pressed", active);
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active);
     });
     refreshPreview();
   }
 
   function bindFontButtons() {
-    $$(".la-font-btn").forEach((btn) => {
-      btn.addEventListener("click", () => applyFont(btn.dataset.font));
+    $$('.la-font-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyFont(btn.dataset.font));
     });
   }
 
@@ -530,27 +480,26 @@
   ───────────────────────────────────────── */
 
   function bindMiniWebsiteToggle() {
-    const toggle = $("#mini-website-toggle");
-    const sections = $("#mini-website-sections");
+    const toggle = $('#mini-website-toggle');
+    const sections = $('#mini-website-sections');
     if (!toggle || !sections) return;
 
-    toggle.addEventListener("change", () => {
+    toggle.addEventListener('change', () => {
       isMiniWebsite = toggle.checked;
-      sections.classList.toggle("hidden", !isMiniWebsite);
+      sections.classList.toggle('hidden', !isMiniWebsite);
       refreshPreview();
       if (isMiniWebsite) {
-        showToast("Mini Website Mode enabled ✦", "success");
+        showToast('Mini Website Mode enabled ✦', 'success');
       }
     });
 
     // About text
-    const aboutEl = $("#about-text");
-    if (aboutEl)
-      aboutEl.addEventListener("input", debounce(refreshPreview, 200));
+    const aboutEl = $('#about-text');
+    if (aboutEl) aboutEl.addEventListener('input', debounce(refreshPreview, 200));
 
     // Show contact toggle
-    const contactEl = $("#show-contact");
-    if (contactEl) contactEl.addEventListener("change", refreshPreview);
+    const contactEl = $('#show-contact');
+    if (contactEl) contactEl.addEventListener('change', refreshPreview);
   }
 
   /* ─────────────────────────────────────────
@@ -558,58 +507,48 @@
   ───────────────────────────────────────── */
 
   function bindGallery() {
-    const zone = $("#gallery-drop-zone");
-    const input = $("#gallery-files");
+    const zone = $('#gallery-drop-zone');
+    const input = $('#gallery-files');
     if (!zone || !input) return;
 
-    zone.addEventListener("click", () => input.click());
-    zone.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") input.click();
+    zone.addEventListener('click', () => input.click());
+    zone.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') input.click();
     });
 
-    zone.addEventListener("dragover", (e) => {
+    zone.addEventListener('dragover', e => {
       e.preventDefault();
-      zone.style.borderColor = "var(--accent)";
+      zone.style.borderColor = 'var(--accent)';
     });
-    zone.addEventListener("dragleave", () => {
-      zone.style.borderColor = "";
-    });
-    zone.addEventListener("drop", async (e) => {
+    zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+    zone.addEventListener('drop', async e => {
       e.preventDefault();
-      zone.style.borderColor = "";
-      const files = [...e.dataTransfer.files].filter((f) =>
-        f.type.startsWith("image/"),
-      );
+      zone.style.borderColor = '';
+      const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
       await handleGalleryFiles(files);
     });
 
-    input.addEventListener("change", async () => {
+    input.addEventListener('change', async () => {
       const files = [...input.files];
       await handleGalleryFiles(files);
     });
   }
 
   async function handleGalleryFiles(files) {
-    const newImages = await Promise.all(
-      files.slice(0, 6 - galleryImages.length).map(fileToBase64),
-    );
+    const newImages = await Promise.all(files.slice(0, 6 - galleryImages.length).map(fileToBase64));
     galleryImages = [...galleryImages, ...newImages].slice(0, 6);
     renderGalleryPreview();
     refreshPreview();
   }
 
   function renderGalleryPreview() {
-    const container = $("#gallery-preview");
+    const container = $('#gallery-preview');
     if (!container) return;
-    container.innerHTML = galleryImages
-      .map(
-        (src, i) => `
+    container.innerHTML = galleryImages.map((src, i) => `
       <div class="la-gallery-thumb">
         <img src="${src}" alt="Gallery ${i + 1}" />
       </div>
-    `,
-      )
-      .join("");
+    `).join('');
   }
 
   /* ─────────────────────────────────────────
@@ -617,15 +556,15 @@
   ───────────────────────────────────────── */
 
   function bindDeviceToggle() {
-    $$(".la-device-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
+    $$('.la-device-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
         const device = btn.dataset.device;
-        $$(".la-device-btn").forEach((b) => {
-          b.classList.toggle("active", b.dataset.device === device);
-          b.setAttribute("aria-pressed", b.dataset.device === device);
+        $$('.la-device-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.device === device);
+          b.setAttribute('aria-pressed', b.dataset.device === device);
         });
-        const frame = $(".la-phone-frame");
-        if (frame) frame.classList.toggle("desktop-mode", device === "desktop");
+        const frame = $('.la-phone-frame');
+        if (frame) frame.classList.toggle('desktop-mode', device === 'desktop');
       });
     });
   }
@@ -640,24 +579,24 @@
   ───────────────────────────────────────── */
 
   function bindSaveShare() {
-    const saveBtn = $("#save-page-btn");
-    const copyBtn = $("#copy-link-btn");
+    const saveBtn = $('#save-page-btn');
+    const copyBtn = $('#copy-link-btn');
 
     if (saveBtn) {
-      saveBtn.addEventListener("click", () => {
+      saveBtn.addEventListener('click', () => {
         const page = getCurrentPageData();
-        if (!page.id) page.id = uid("page");
+        if (!page.id) page.id = uid('page');
         activePageId = page.id;
-        saveStorage("activePageId", activePageId);
+        saveStorage('activePageId', activePageId);
         savePage(page);
-        showToast("Page saved ✦", "success");
+        showToast('Page saved ✦', 'success');
         animateSaveBtn(saveBtn);
       });
     }
 
     // "Copy Link" button now exports a standalone HTML file
     if (copyBtn) {
-      copyBtn.addEventListener("click", () => {
+      copyBtn.addEventListener('click', () => {
         const page = getCurrentPageData();
         exportPageAsHtml(page);
       });
@@ -678,90 +617,74 @@
   }
 
   function _buildPageHtml(page) {
-    const accent = page.accent || "#c4842a";
+    const accent = page.accent || '#c4842a';
     const { hexToRgba } = window.LinkAuraUtils;
     const accentDim = hexToRgba(accent, 0.18);
     const accentGlow = hexToRgba(accent, 0.32);
-    const isDark = (page.theme || "dark") === "dark";
+    const isDark = (page.theme || 'dark') === 'dark';
 
-    const bgBase = isDark ? "#0c0c0e" : "#f7f5f2";
-    const bgGlass = isDark
-      ? "rgba(255,255,255,0.06)"
-      : "rgba(255,255,255,0.65)";
-    const bgBorder = isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.09)";
-    const textPrim = isDark ? "#f0ede8" : "#1a1714";
-    const textSec = isDark ? "rgba(240,237,232,0.55)" : "rgba(26,23,20,0.55)";
-    const textMuted = isDark ? "rgba(240,237,232,0.3)" : "rgba(26,23,20,0.3)";
+    const bgBase     = isDark ? '#0c0c0e' : '#f7f5f2';
+    const bgGlass    = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)';
+    const bgBorder   = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.09)';
+    const textPrim   = isDark ? '#f0ede8' : '#1a1714';
+    const textSec    = isDark ? 'rgba(240,237,232,0.55)' : 'rgba(26,23,20,0.55)';
+    const textMuted  = isDark ? 'rgba(240,237,232,0.3)'  : 'rgba(26,23,20,0.3)';
 
     const fontMap = {
       editorial: "'Cormorant Garamond', serif",
-      modern: "'DM Sans', sans-serif",
-      mono: "'DM Mono', monospace",
+      modern:    "'DM Sans', sans-serif",
+      mono:      "'DM Mono', monospace",
     };
     const fontDisplay = fontMap[page.font] || fontMap.editorial;
-    const fontBody = "'DM Sans', sans-serif";
+    const fontBody    = "'DM Sans', sans-serif";
 
     const socialIcons = {
-      instagram: "📸",
-      twitter: "𝕏",
-      youtube: "▶️",
-      tiktok: "🎵",
-      linkedin: "💼",
-      github: "🐙",
-      spotify: "🎧",
-      pinterest: "📌",
+      instagram: '📸', twitter: '𝕏', youtube: '▶️', tiktok: '🎵',
+      linkedin: '💼', github: '🐙', spotify: '🎧', pinterest: '📌',
     };
     const socialLinks = Object.entries(page.socials || {})
       .filter(([, v]) => v)
       .map(([k, v]) => {
-        const handle = v.startsWith("http")
-          ? v
-          : `https://${k}.com/${v.replace("@", "")}`;
+        const handle = v.startsWith('http') ? v : `https://${k}.com/${v.replace('@','')}`;
         return `<a href="${handle}" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="${k}">
-          ${socialIcons[k] || "🔗"}
+          ${socialIcons[k] || '🔗'}
         </a>`;
-      })
-      .join("");
+      }).join('');
 
-    const linkCards = (page.links || [])
-      .filter((l) => l.active)
-      .map((l) => {
-        let cardStyle = "";
-        if (page.cardStyle === "solid") {
-          cardStyle = `background:${accent};color:#fff;border:none;`;
-        } else if (page.cardStyle === "outline") {
-          cardStyle = `background:transparent;border:1.5px solid ${accent};color:${accent};`;
-        } else if (page.cardStyle === "soft") {
-          cardStyle = `background:${accentDim};border:1px solid ${accentDim};color:${accent};`;
-        } else {
-          cardStyle = `background:${bgGlass};border:1px solid ${bgBorder};backdrop-filter:blur(12px);`;
-        }
-        const url = l.url || "#";
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="link-card" style="${cardStyle}">
-        <span class="link-icon">${l.icon || "🔗"}</span>
-        <span class="link-title">${l.title || ""}</span>
+    const linkCards = (page.links || []).filter(l => l.active).map(l => {
+      let cardStyle = '';
+      if (page.cardStyle === 'solid') {
+        cardStyle = `background:${accent};color:#fff;border:none;`;
+      } else if (page.cardStyle === 'outline') {
+        cardStyle = `background:transparent;border:1.5px solid ${accent};color:${accent};`;
+      } else if (page.cardStyle === 'soft') {
+        cardStyle = `background:${accentDim};border:1px solid ${accentDim};color:${accent};`;
+      } else {
+        cardStyle = `background:${bgGlass};border:1px solid ${bgBorder};backdrop-filter:blur(12px);`;
+      }
+      const url = l.url || '#';
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="link-card" style="${cardStyle}">
+        <span class="link-icon">${l.icon || '🔗'}</span>
+        <span class="link-title">${l.title || ''}</span>
         <span class="link-arrow">↗</span>
       </a>`;
-      })
-      .join("");
+    }).join('');
 
     const avatarHtml = page.avatar
-      ? `<img src="${page.avatar}" alt="${page.profileName || ""}" class="avatar-img" />`
+      ? `<img src="${page.avatar}" alt="${page.profileName || ''}" class="avatar-img" />`
       : `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="${textMuted}" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
 
     // Mini website sections
-    let miniSections = "";
+    let miniSections = '';
     if (page.miniWebsite) {
       if (page.aboutText) {
         miniSections += `
           <div class="section-heading">About</div>
-          <p class="about-text">${page.aboutText.replace(/\n/g, "<br>")}</p>`;
+          <p class="about-text">${page.aboutText.replace(/\n/g, '<br>')}</p>`;
       }
       if (page.gallery?.length) {
-        const imgs = page.gallery
-          .slice(0, 6)
-          .map((src) => `<img src="${src}" alt="" class="gallery-img" />`)
-          .join("");
+        const imgs = page.gallery.slice(0, 6).map(src =>
+          `<img src="${src}" alt="" class="gallery-img" />`).join('');
         miniSections += `
           <div class="section-heading">Gallery</div>
           <div class="gallery-grid">${imgs}</div>`;
@@ -782,9 +705,7 @@
     }
 
     // Particle JS for exported page
-    const particleJs =
-      page.bg === "particles"
-        ? `
+    const particleJs = page.bg === 'particles' ? `
     <canvas id="bg-canvas"></canvas>
     <script>
       (function(){
@@ -820,24 +741,22 @@
         }
         loop();
       })();
-    <\/script>`
-        : "";
+    <\/script>` : '';
 
-    const bgStyle =
-      page.bg === "gradient"
-        ? `background: radial-gradient(ellipse at 20% 50%, ${accentDim} 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, ${hexToRgba(accent, 0.04)} 0%, transparent 40%), ${bgBase};`
-        : page.bg === "mesh"
-          ? `background: linear-gradient(135deg, ${accentDim} 0%, transparent 50%), linear-gradient(225deg, ${hexToRgba(accent, 0.04)} 0%, transparent 50%), ${bgBase};`
-          : `background:${bgBase};`;
+    const bgStyle = page.bg === 'gradient'
+      ? `background: radial-gradient(ellipse at 20% 50%, ${accentDim} 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, ${hexToRgba(accent, 0.04)} 0%, transparent 40%), ${bgBase};`
+      : page.bg === 'mesh'
+      ? `background: linear-gradient(135deg, ${accentDim} 0%, transparent 50%), linear-gradient(225deg, ${hexToRgba(accent, 0.04)} 0%, transparent 50%), ${bgBase};`
+      : `background:${bgBase};`;
 
-    const username = page.username || page.id || "me";
+    const username = page.username || page.id || 'me';
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${page.profileName || "My LinkAura"}</title>
-  <meta name="description" content="${(page.bio || "").slice(0, 150)}" />
+  <title>${page.profileName || 'My LinkAura'}</title>
+  <meta name="description" content="${(page.bio || '').slice(0, 150)}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
@@ -972,6 +891,14 @@
       text-align: center;
     }
     .page-footer a { color: ${accent}; text-decoration: none; }
+    /* Footer heartbeat */
+    @keyframes hb {
+      0%,100%{ transform:scale(1); opacity:.8; }
+      14%    { transform:scale(1.3); opacity:1; }
+      28%    { transform:scale(1); opacity:.8; }
+      42%    { transform:scale(1.15); opacity:1; }
+    }
+
     /* Smooth entrance */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(14px); }
@@ -993,13 +920,13 @@
   ${particleJs}
   <div class="page-wrap">
     <div class="avatar">${avatarHtml}</div>
-    <h1 class="display-name">${page.profileName || "Your Name"}</h1>
-    ${page.bio ? `<p class="bio">${page.bio.replace(/\n/g, "<br>")}</p>` : ""}
-    ${socialLinks ? `<div class="socials">${socialLinks}</div>` : ""}
-    ${linkCards ? `<div class="links">${linkCards}</div>` : ""}
+    <h1 class="display-name">${page.profileName || 'Your Name'}</h1>
+    ${page.bio ? `<p class="bio">${page.bio.replace(/\n/g,'<br>')}</p>` : ''}
+    ${socialLinks ? `<div class="socials">${socialLinks}</div>` : ''}
+    ${linkCards ? `<div class="links">${linkCards}</div>` : ''}
     ${miniSections}
     <p class="page-footer">
-      Made with <a href="https://github.com/linkaura" target="_blank" rel="noopener">LinkAura</a>
+      <span style="display:inline-flex;align-items:center;gap:0.35rem;flex-wrap:wrap;justify-content:center;"><span>Crafted with</span><span style="color:${accent};display:inline-block;">&#9829;</span><span>by</span><a href="https://blackbirdo.com" target="_blank" rel="noopener noreferrer" style="color:${accent};text-decoration:none;font-weight:500;">blackbirdo.com</a><span style="opacity:0.4">&middot;</span><a href="https://github.com/linkaura" target="_blank" rel="noopener noreferrer" style="color:${accent};text-decoration:none;opacity:0.6;">LinkAura</a></span>
     </p>
   </div>
   <script>
@@ -1017,12 +944,12 @@
 
   function exportPageAsHtml(page) {
     const html = _buildPageHtml(page);
-    const username = page.username || page.id || "me";
+    const username = (page.username || page.id || 'me');
 
     // Trigger download
-    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `${username}-linkaura.html`;
     document.body.appendChild(a);
@@ -1030,20 +957,16 @@
     a.remove();
     URL.revokeObjectURL(url);
 
-    showToast(
-      "✦ HTML file downloaded! Open it in any browser or host it free on Netlify / GitHub Pages.",
-      "success",
-      5500,
-    );
+    showToast('✦ HTML file downloaded! Open it in any browser or host it free on Netlify / GitHub Pages.', 'success', 5500);
   }
 
   function animateSaveBtn(btn) {
     const original = btn.innerHTML;
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Saved!`;
-    btn.style.background = "#4caf7d";
+    btn.style.background = '#4caf7d';
     setTimeout(() => {
       btn.innerHTML = original;
-      btn.style.background = "";
+      btn.style.background = '';
     }, 2000);
   }
 
@@ -1053,7 +976,7 @@
 
   function renderPagesGrid() {
     loadAllPages();
-    const grid = $("#pages-grid");
+    const grid = $('#pages-grid');
     if (!grid) return;
 
     const pages = Object.values(allPages);
@@ -1070,49 +993,42 @@
           </button>
         </div>
       `;
-      $("#empty-create-btn")?.addEventListener("click", () => startNewPage());
+      $('#empty-create-btn')?.addEventListener('click', () => startNewPage());
       return;
     }
 
-    grid.innerHTML = "";
-    pages
-      .sort((a, b) => b.updatedAt - a.updatedAt)
-      .forEach((page) => {
-        const card = buildPageCard(page);
-        grid.appendChild(card);
-      });
+    grid.innerHTML = '';
+    pages.sort((a, b) => b.updatedAt - a.updatedAt).forEach(page => {
+      const card = buildPageCard(page);
+      grid.appendChild(card);
+    });
   }
 
   function buildPageCard(page) {
-    const card = document.createElement("div");
-    card.className = "la-page-card";
-    card.setAttribute("role", "article");
+    const card = document.createElement('div');
+    card.className = 'la-page-card';
+    card.setAttribute('role', 'article');
 
     // Mini preview thumbnail
-    const accent = page.accent || "#c4842a";
+    const accent = page.accent || '#c4842a';
     const { hexToRgba } = window.LinkAuraUtils;
 
     card.innerHTML = `
-      <div class="la-page-card__thumb" style="background:linear-gradient(135deg,${hexToRgba(accent, 0.15)} 0%, var(--bg-elevated) 100%);">
+      <div class="la-page-card__thumb" style="background:linear-gradient(135deg,${hexToRgba(accent,0.15)} 0%, var(--bg-elevated) 100%);">
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:1rem;width:100%;">
-          <div style="width:36px;height:36px;border-radius:50%;background:${hexToRgba(accent, 0.3)};border:2px solid ${accent};display:flex;align-items:center;justify-content:center;font-size:0.8rem;overflow:hidden;">
-            ${page.avatar ? `<img src="${page.avatar}" style="width:100%;height:100%;object-fit:cover;" alt="" />` : "👤"}
+          <div style="width:36px;height:36px;border-radius:50%;background:${hexToRgba(accent,0.3)};border:2px solid ${accent};display:flex;align-items:center;justify-content:center;font-size:0.8rem;overflow:hidden;">
+            ${page.avatar ? `<img src="${page.avatar}" style="width:100%;height:100%;object-fit:cover;" alt="" />` : '👤'}
           </div>
           <div style="font-size:0.7rem;font-weight:600;color:var(--text-primary);text-align:center;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
             ${escapeHtml(page.profileName || page.name)}
           </div>
-          ${(page.links || [])
-            .slice(0, 3)
-            .map(
-              (l) => `
-            <div style="width:90%;height:8px;background:${hexToRgba(accent, 0.2)};border:1px solid ${hexToRgba(accent, 0.3)};border-radius:4px;"></div>
-          `,
-            )
-            .join("")}
+          ${(page.links || []).slice(0,3).map(l => `
+            <div style="width:90%;height:8px;background:${hexToRgba(accent,0.2)};border:1px solid ${hexToRgba(accent,0.3)};border-radius:4px;"></div>
+          `).join('')}
         </div>
       </div>
       <div class="la-page-card__info">
-        <div class="la-page-card__name">${escapeHtml(page.name || "Untitled")}</div>
+        <div class="la-page-card__name">${escapeHtml(page.name || 'Untitled')}</div>
         <div class="la-page-card__meta">
           linkaura.io/${page.username || page.id} · ${timeAgo(page.updatedAt)}
         </div>
@@ -1135,24 +1051,25 @@
       </div>
     `;
 
-    card.querySelector("[data-edit]")?.addEventListener("click", () => {
+    card.querySelector('[data-edit]')?.addEventListener('click', () => {
       editPage(page.id);
     });
-    card.querySelector("[data-preview]")?.addEventListener("click", () => {
+    card.querySelector('[data-preview]')?.addEventListener('click', () => {
       openFullPreview(page);
     });
-    card.querySelector("[data-export]")?.addEventListener("click", () => {
-      exportPageAsHtml(page);
+    card.querySelector('[data-export]')?.addEventListener('click', () => {
+      // First try to publish, fallback to download
+      if (window.LinkAuraPublish) {
+        window.LinkAuraPublish.publish(page);
+      } else {
+        exportPageAsHtml(page);
+      }
     });
-    card.querySelector("[data-delete]")?.addEventListener("click", () => {
-      if (
-        confirm(
-          'Delete "' + (page.name || "this page") + '"? This cannot be undone.',
-        )
-      ) {
+    card.querySelector('[data-delete]')?.addEventListener('click', () => {
+      if (confirm('Delete "' + (page.name || 'this page') + '"? This cannot be undone.')) {
         deletePage(page.id);
         renderPagesGrid();
-        showToast("Page deleted", "info");
+        showToast('Page deleted', 'info');
       }
     });
 
@@ -1164,34 +1081,34 @@
     const page = allPages[id];
     if (!page) return;
     activePageId = id;
-    saveStorage("activePageId", id);
+    saveStorage('activePageId', id);
     populateEditorFromPage(page);
-    navigateTo("builder");
+    navigateTo('builder');
   }
 
   function duplicatePage(id) {
     loadAllPages();
     const page = allPages[id];
     if (!page) return;
-    const newId = uid("page");
+    const newId = uid('page');
     const copy = {
       ...page,
       id: newId,
-      name: page.name + " (copy)",
-      username: (page.username || "") + "-copy",
+      name: page.name + ' (copy)',
+      username: (page.username || '') + '-copy',
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
     savePage(copy);
     renderPagesGrid();
-    showToast("Page duplicated ✦", "success");
+    showToast('Page duplicated ✦', 'success');
   }
 
   function startNewPage() {
-    activePageId = uid("page");
-    saveStorage("activePageId", activePageId);
+    activePageId = uid('page');
+    saveStorage('activePageId', activePageId);
     populateEditorFromPage({ ...DEFAULT_PAGE, id: activePageId });
-    navigateTo("builder");
+    navigateTo('builder');
   }
 
   /* ─────────────────────────────────────────
@@ -1200,74 +1117,62 @@
 
   function bindAiOnboarding() {
     // CTA buttons on landing
-    const ctaBuilder = $("#cta-builder");
-    const ctaAi = $("#cta-ai");
+    const ctaBuilder = $('#cta-builder');
+    const ctaAi = $('#cta-ai');
 
     if (ctaBuilder) {
-      ctaBuilder.addEventListener("click", () => {
+      ctaBuilder.addEventListener('click', () => {
         startNewPage();
       });
     }
 
     if (ctaAi) {
-      ctaAi.addEventListener("click", () => {
-        navigateTo("ai-onboard");
+      ctaAi.addEventListener('click', () => {
+        navigateTo('ai-onboard');
       });
     }
 
     // AI Generate button
-    const generateBtn = $("#ai-generate-btn");
+    const generateBtn = $('#ai-generate-btn');
     if (generateBtn) {
-      generateBtn.addEventListener("click", async () => {
-        const name = $("#ai-name")?.value?.trim() || "";
-        const niche = $("#ai-niche")?.value?.trim() || "";
-        const vibe = $("#ai-vibe")?.value?.trim() || "";
+      generateBtn.addEventListener('click', async () => {
+        const name = $('#ai-name')?.value?.trim() || '';
+        const niche = $('#ai-niche')?.value?.trim() || '';
+        const vibe = $('#ai-vibe')?.value?.trim() || '';
 
         if (!name && !niche) {
-          showToast("Please enter your name or niche first", "error");
+          showToast('Please enter your name or niche first', 'error');
           return;
         }
 
         // Show loader
-        const label = generateBtn.querySelector(".btn-label");
-        const loader = generateBtn.querySelector(".btn-loader");
+        const label = generateBtn.querySelector('.btn-label');
+        const loader = generateBtn.querySelector('.btn-loader');
         if (label) label.hidden = true;
         if (loader) loader.hidden = false;
         generateBtn.disabled = true;
 
         try {
-          const result = await window.LinkAuraAI.generatePage(
-            name,
-            niche,
-            vibe,
-          );
+          const result = await window.LinkAuraAI.generatePage(name, niche, vibe);
 
           // Apply to new page
-          activePageId = uid("page");
-          saveStorage("activePageId", activePageId);
+          activePageId = uid('page');
+          saveStorage('activePageId', activePageId);
 
           // Set profile
-          const nameEl = $("#profile-name");
-          const bioEl = $("#profile-bio");
-          if (nameEl) {
-            nameEl.value = name;
-          }
-          if (bioEl) {
-            bioEl.value = result.bio;
-            updateBioCount();
-          }
+          const nameEl = $('#profile-name');
+          const bioEl = $('#profile-bio');
+          if (nameEl) { nameEl.value = name; }
+          if (bioEl) { bioEl.value = result.bio; updateBioCount(); }
 
           // Apply template
           window.LinkAuraAI.applyTemplate(result.nicheId);
 
           // Navigate to builder
-          navigateTo("builder");
-          showToast(
-            `✨ Your ${result.template.name} page is ready!`,
-            "success",
-          );
+          navigateTo('builder');
+          showToast(`✨ Your ${result.template.name} page is ready!`, 'success');
         } catch (err) {
-          showToast("Something went wrong. Please try again.", "error");
+          showToast('Something went wrong. Please try again.', 'error');
         } finally {
           if (label) label.hidden = false;
           if (loader) loader.hidden = true;
@@ -1277,9 +1182,9 @@
     }
 
     // Skip button
-    const skipBtn = $("#ai-skip-btn");
+    const skipBtn = $('#ai-skip-btn');
     if (skipBtn) {
-      skipBtn.addEventListener("click", () => startNewPage());
+      skipBtn.addEventListener('click', () => startNewPage());
     }
   }
 
@@ -1289,45 +1194,45 @@
 
   function bindHeaderNav() {
     // Builder button
-    const builderBtn = $("#tab-builder");
+    const builderBtn = $('#tab-builder');
     if (builderBtn) {
-      builderBtn.addEventListener("click", () => {
+      builderBtn.addEventListener('click', () => {
         if (!activePageId) startNewPage();
-        else navigateTo("builder");
-        syncNavButtons("builder");
+        else navigateTo('builder');
+        syncNavButtons('builder');
       });
     }
 
     // Preview button — opens full-screen preview in a new tab
-    const previewBtn = $("#tab-preview");
+    const previewBtn = $('#tab-preview');
     if (previewBtn) {
-      previewBtn.addEventListener("click", () => {
+      previewBtn.addEventListener('click', () => {
         const page = getCurrentPageData();
         openFullPreview(page);
       });
     }
 
     // Pages button
-    const pagesBtn = $("#tab-pages");
+    const pagesBtn = $('#tab-pages');
     if (pagesBtn) {
-      pagesBtn.addEventListener("click", () => {
-        navigateTo("pages");
-        syncNavButtons("pages");
+      pagesBtn.addEventListener('click', () => {
+        navigateTo('pages');
+        syncNavButtons('pages');
       });
     }
 
     // New page button in pages view
-    const newPageBtn = $("#new-page-btn");
-    if (newPageBtn) newPageBtn.addEventListener("click", startNewPage);
+    const newPageBtn = $('#new-page-btn');
+    if (newPageBtn) newPageBtn.addEventListener('click', startNewPage);
   }
 
   /** Highlight the correct nav pill by matching tab-{viewId} id */
   function syncNavButtons(activeView) {
-    ["builder", "pages", "preview"].forEach((view) => {
+    ['builder', 'pages', 'preview'].forEach(view => {
       const btn = $(`#tab-${view}`);
       if (btn) {
-        const isActive = view === activeView;
-        btn.classList.toggle("active", isActive);
+        const isActive = (view === activeView);
+        btn.classList.toggle('active', isActive);
       }
     });
   }
@@ -1339,15 +1244,15 @@
   function openFullPreview(page) {
     // Reuse the HTML exporter but open in a new tab instead of downloading
     const html = generatePageHtml(page);
-    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const win = window.open(url, "_blank", "noopener");
+    const win = window.open(url, '_blank', 'noopener');
     // Revoke after tab loads
     setTimeout(() => URL.revokeObjectURL(url), 10000);
     if (!win) {
-      showToast("Pop-up blocked — please allow pop-ups for preview", "error");
+      showToast('Pop-up blocked — please allow pop-ups for preview', 'error');
     } else {
-      showToast("✦ Preview opened in new tab", "success");
+      showToast('✦ Preview opened in new tab', 'success');
     }
   }
 
@@ -1357,21 +1262,21 @@
 
   function bindCustomEvents() {
     // Preview refresh from other modules
-    document.addEventListener("linkaura:previewrefresh", refreshPreview);
+    document.addEventListener('linkaura:previewrefresh', refreshPreview);
 
     // Links changed
-    document.addEventListener("linkaura:linkschanged", (e) => {
+    document.addEventListener('linkaura:linkschanged', (e) => {
       // Auto-save silently
       const page = getCurrentPageData();
       if (activePageId) savePage(page);
     });
 
     // Navigation from template cards
-    document.addEventListener("linkaura:navigate", (e) => {
+    document.addEventListener('linkaura:navigate', (e) => {
       const view = e.detail;
-      if (view === "builder") {
+      if (view === 'builder') {
         if (!activePageId) startNewPage();
-        else navigateTo("builder");
+        else navigateTo('builder');
       } else {
         navigateTo(view);
       }
@@ -1397,7 +1302,7 @@
 
   function restoreSession() {
     loadAllPages();
-    const savedId = loadStorage("activePageId");
+    const savedId = loadStorage('activePageId');
     if (savedId && allPages[savedId]) {
       activePageId = savedId;
       // Don't auto-navigate; let user start from landing
@@ -1409,13 +1314,13 @@
   ───────────────────────────────────────── */
 
   function bindKeyboardShortcuts() {
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener('keydown', (e) => {
       // Cmd/Ctrl + S → Save
-      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
-        const view = document.querySelector(".la-view.active")?.id;
-        if (view === "view-builder") {
-          $("#save-page-btn")?.click();
+        const view = document.querySelector('.la-view.active')?.id;
+        if (view === 'view-builder') {
+          $('#save-page-btn')?.click();
         }
       }
     });
@@ -1450,23 +1355,19 @@
     updateUsernamePreview();
 
     // Show landing view by default
-    navigateTo("landing");
+    navigateTo('landing');
 
     // If returning user with a saved page, hint them
     const pages = Object.values(allPages);
     if (pages.length > 0) {
       setTimeout(() => {
-        showToast(
-          `Welcome back! You have ${pages.length} saved page${pages.length > 1 ? "s" : ""}.`,
-          "info",
-          4000,
-        );
+        showToast(`Welcome back! You have ${pages.length} saved page${pages.length > 1 ? 's' : ''}.`, 'info', 4000);
       }, 800);
     }
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
@@ -1475,6 +1376,7 @@
   window.LinkAuraApp = {
     navigateTo,
     getCurrentPageData,
+    generatePageHtml,   // used by publish.js
     refreshPreview,
     startNewPage,
     allPages,
