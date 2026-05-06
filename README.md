@@ -153,7 +153,7 @@ Replace it with your own deployed URL (see Deployment section below):
 
 ```js
 // Example for GitHub Pages:
-const VIEWER_BASE = 'https://YOUR-USERNAME.github.io/linkaura/view.html';
+const VIEWER_BASE = 'https://ICodingStack.github.io/LinkAura/view.html';
 
 // Example for Netlify:
 const VIEWER_BASE = 'https://your-linkaura.netlify.app/view.html';
@@ -188,19 +188,19 @@ LinkAura is a static site — deploy anywhere for free. Both `index.html` **and*
 git init
 git add .
 git commit -m "Launch LinkAura"
-git remote add origin https://github.com/YOUR-USERNAME/linkaura.git
+git remote add origin https://github.com/ICodingStack/LinkAura.git
 git push -u origin main
 
 # 3. Enable GitHub Pages:
 #    Repo → Settings → Pages → Source: Deploy from branch → main → / (root) → Save
 
 # 4. Your site is live at:
-#    https://YOUR-USERNAME.github.io/linkaura/
+#    https://ICodingStack.github.io/LinkAura/
 ```
 
 After deploying, update `VIEWER_BASE` in `js/publish.js`:
 ```js
-const VIEWER_BASE = 'https://YOUR-USERNAME.github.io/linkaura/view.html';
+const VIEWER_BASE = 'https://ICodingStack.github.io/LinkAura/view.html';
 ```
 
 ---
@@ -353,6 +353,3 @@ Designed and built with love for creators everywhere.
 
 **Made with ♥ by [BlackBirdo](https://blackbirdo.com)**
 
-<p align="center">
-  <strong>LinkAura</strong> — Your Links, Elevated ✦
-</p>
