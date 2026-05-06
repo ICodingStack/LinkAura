@@ -88,8 +88,8 @@ linkaura/
 
 ### Option 1: Open directly (no build step)
 ```bash
-git clone https://github.com/yourusername/linkaura.git
-cd linkaura
+git clone https://github.com/ICodingStack/LinkAura.git
+cd LinkAura
 open index.html
 ```
 
